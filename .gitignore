@@ -9,5 +9,6 @@ private/
 .replit
 replit.nix
 
-# Content is synced from the content repo at build time
-content/
+# NOTE: do NOT ignore content/ here. Quartz uses globby with `gitignore: true`,
+# so listing it would make the file discovery return zero markdown files.
+# content/ is git-ignored via .git/info/exclude instead (per-clone, untracked).
