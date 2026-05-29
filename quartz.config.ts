@@ -16,7 +16,7 @@ const config: QuartzConfig = {
       provider: "plausible",
     },
     locale: "zh-CN",
-    baseUrl: "poiseacademy.com",
+    baseUrl: "poisemath.com",
     ignorePatterns: ["private", "templates", ".obsidian", ".trash", ".git", "node_modules", "*.icloud"],
     defaultDateType: "modified",
     theme: {
