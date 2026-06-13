@@ -6,13 +6,28 @@ set -euo pipefail
 CONTENT_REPO="${CONTENT_REPO:-https://github.com/EricDong/poisemath-content.git}"
 CONTENT_BRANCH="${CONTENT_BRANCH:-main}"
 CONTENT_DIR="content"
+TMP_DIR="$(mktemp -d)"
+SOURCE_DIR="$TMP_DIR/source"
+
+cleanup() {
+  rm -rf "$TMP_DIR"
+}
+trap cleanup EXIT
 
 echo "→ Syncing content from $CONTENT_REPO ($CONTENT_BRANCH)"
 
 rm -rf "$CONTENT_DIR"
-git clone --depth=1 --branch "$CONTENT_BRANCH" "$CONTENT_REPO" "$CONTENT_DIR"
+git clone --depth=1 --branch "$CONTENT_BRANCH" "$CONTENT_REPO" "$SOURCE_DIR"
 
-# Strip the content repo's .git so Quartz' git-date plugin uses site repo's
+if [ ! -d "$SOURCE_DIR/publish" ]; then
+  echo "Expected publish/ directory in content repo, but it was not found."
+  exit 1
+fi
+
+mkdir -p "$CONTENT_DIR"
+cp -R "$SOURCE_DIR/publish/." "$CONTENT_DIR/"
+
+# Strip any git metadata so Quartz' git-date plugin uses the site repo.
 rm -rf "$CONTENT_DIR/.git"
 
 echo "→ Content synced:"
