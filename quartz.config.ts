@@ -17,7 +17,15 @@ const config: QuartzConfig = {
     },
     locale: "zh-CN",
     baseUrl: "poisemath.com",
-    ignorePatterns: ["private", "templates", ".obsidian", ".trash", ".git", "node_modules", "*.icloud"],
+    ignorePatterns: [
+      "private",
+      "templates",
+      ".obsidian",
+      ".trash",
+      ".git",
+      "node_modules",
+      "*.icloud",
+    ],
     defaultDateType: "modified",
     theme: {
       fontOrigin: "googleFonts",

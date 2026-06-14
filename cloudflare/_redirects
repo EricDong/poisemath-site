@@ -1,0 +1,6 @@
+# Cloudflare Pages redirects for the journeytomath.com -> poisemath.com migration.
+# Keep these 301 redirects active as long as journeytomath.com receives traffic.
+https://journeytomath.com/* https://poisemath.com/:splat 301
+https://www.journeytomath.com/* https://poisemath.com/:splat 301
+http://journeytomath.com/* https://poisemath.com/:splat 301
+http://www.journeytomath.com/* https://poisemath.com/:splat 301
