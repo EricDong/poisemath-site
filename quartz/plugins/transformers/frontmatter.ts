@@ -52,6 +52,18 @@ function getAliasSlugs(aliases: string[]): FullSlug[] {
   return res
 }
 
+function getCustomSlug(input: unknown): FullSlug | undefined {
+  if (input === undefined || input === null) return undefined
+
+  const normalized = input
+    .toString()
+    .trim()
+    .replace(/^\/+|\/+$/g, "")
+
+  if (normalized === "") return undefined
+  return slugifyFilePath((normalized + ".md") as FilePath)
+}
+
 export const FrontMatter: QuartzTransformerPlugin<Partial<Options>> = (userOpts) => {
   const opts = { ...defaultOptions, ...userOpts }
   return {
@@ -85,6 +97,18 @@ export const FrontMatter: QuartzTransformerPlugin<Partial<Options>> = (userOpts)
               data.aliases = aliases // frontmatter
               file.data.aliases = getAliasSlugs(aliases)
               allSlugs.push(...file.data.aliases)
+            }
+
+            const customSlug = getCustomSlug(data.slug)
+            if (customSlug && customSlug !== file.data.slug) {
+              const originalSlug = file.data.slug!
+              const aliases = file.data.aliases ?? []
+              aliases.push(originalSlug)
+              file.data.aliases = aliases
+              allSlugs.push(originalSlug)
+
+              file.data.slug = customSlug
+              data.slug = customSlug
             }
 
             if (data.permalink != null && data.permalink.toString() !== "") {
