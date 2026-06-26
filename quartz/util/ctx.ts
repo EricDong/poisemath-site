@@ -26,6 +26,7 @@ export interface BuildCtx {
   argv: Argv
   cfg: QuartzConfig
   allSlugs: FullSlug[]
+  slugAliases?: Map<FullSlug, FullSlug>
   allFiles: FilePath[]
   trie?: FileTrieNode<BuildTimeTrieData>
   incremental: boolean

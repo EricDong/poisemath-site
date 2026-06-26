@@ -3,7 +3,15 @@ import remarkFrontmatter from "remark-frontmatter"
 import { QuartzTransformerPlugin } from "../types"
 import yaml from "js-yaml"
 import toml from "toml"
-import { FilePath, FullSlug, getFileExtension, slugifyFilePath, slugTag } from "../../util/path"
+import { BuildCtx } from "../../util/ctx"
+import {
+  FilePath,
+  FullSlug,
+  getFileExtension,
+  joinSegments,
+  slugifyFilePath,
+  slugTag,
+} from "../../util/path"
 import { QuartzPluginData } from "../vfile"
 import { i18n } from "../../i18n"
 
@@ -64,6 +72,11 @@ function getCustomSlug(input: unknown): FullSlug | undefined {
   return slugifyFilePath((normalized + ".md") as FilePath)
 }
 
+function addSlugAlias(ctx: BuildCtx, alias: FullSlug, canonical: FullSlug) {
+  ctx.slugAliases ??= new Map()
+  ctx.slugAliases.set(alias, canonical)
+}
+
 export const FrontMatter: QuartzTransformerPlugin<Partial<Options>> = (userOpts) => {
   const opts = { ...defaultOptions, ...userOpts }
   return {
@@ -96,6 +109,7 @@ export const FrontMatter: QuartzTransformerPlugin<Partial<Options>> = (userOpts)
             if (aliases) {
               data.aliases = aliases // frontmatter
               file.data.aliases = getAliasSlugs(aliases)
+              file.data.aliases.forEach((alias) => addSlugAlias(ctx, alias, file.data.slug!))
               allSlugs.push(...file.data.aliases)
             }
 
@@ -104,11 +118,14 @@ export const FrontMatter: QuartzTransformerPlugin<Partial<Options>> = (userOpts)
               const originalSlug = file.data.slug!
               const aliases = file.data.aliases ?? []
               aliases.push(originalSlug)
+              aliases.push(joinSegments("publish", originalSlug) as FullSlug)
               file.data.aliases = aliases
               allSlugs.push(originalSlug)
+              allSlugs.push(joinSegments("publish", originalSlug) as FullSlug)
 
               file.data.slug = customSlug
               data.slug = customSlug
+              aliases.forEach((alias) => addSlugAlias(ctx, alias, customSlug))
             }
 
             if (data.permalink != null && data.permalink.toString() !== "") {

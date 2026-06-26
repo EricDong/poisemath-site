@@ -224,6 +224,7 @@ export function getAllSegmentPrefixes(tags: string): string[] {
 export interface TransformOptions {
   strategy: "absolute" | "relative" | "shortest"
   allSlugs: FullSlug[]
+  slugAliases?: Map<FullSlug, FullSlug>
 }
 
 export function transformLink(src: FullSlug, target: string, opts: TransformOptions): RelativeURL {
@@ -235,6 +236,11 @@ export function transformLink(src: FullSlug, target: string, opts: TransformOpti
     const folderTail = isFolderPath(targetSlug) ? "/" : ""
     const canonicalSlug = stripSlashes(targetSlug.slice(".".length))
     let [targetCanonical, targetAnchor] = splitAnchor(canonicalSlug)
+
+    const aliasedSlug = opts.slugAliases?.get(canonicalSlug as FullSlug)
+    if (aliasedSlug) {
+      return (resolveRelative(src, aliasedSlug) + targetAnchor) as RelativeURL
+    }
 
     if (opts.strategy === "shortest") {
       // if the file name is unique, then it's just the filename
