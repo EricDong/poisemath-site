@@ -12,6 +12,10 @@ interface ContentMetaOptions {
    */
   showReadingTime: boolean
   showComma: boolean
+  author?: {
+    name: string
+    url: string
+  }
 }
 
 const defaultOptions: ContentMetaOptions = {
@@ -28,6 +32,10 @@ export default ((opts?: Partial<ContentMetaOptions>) => {
 
     if (text) {
       const segments: (string | JSX.Element)[] = []
+
+      if (options.author && fileData.slug !== "index") {
+        segments.push(<a href={options.author.url}>{options.author.name}</a>)
+      }
 
       if (fileData.dates) {
         segments.push(<Date date={getDate(cfg, fileData)!} locale={cfg.locale} />)

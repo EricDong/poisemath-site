@@ -8,7 +8,7 @@ import * as Plugin from "./quartz/plugins"
  */
 const config: QuartzConfig = {
   configuration: {
-    pageTitle: "Poise Academy",
+    pageTitle: "Poise Math",
     pageTitleSuffix: "",
     enableSPA: true,
     enablePopovers: true,
@@ -28,8 +28,8 @@ const config: QuartzConfig = {
     ],
     defaultDateType: "modified",
     theme: {
-      fontOrigin: "googleFonts",
-      cdnCaching: true,
+      fontOrigin: "local",
+      cdnCaching: false,
       typography: {
         header: "Noto Serif SC",
         body: "Noto Sans SC",
@@ -92,6 +92,7 @@ const config: QuartzConfig = {
         enableSiteMap: true,
         enableRSS: true,
       }),
+      Plugin.SeoFiles(),
       Plugin.Assets(),
       Plugin.Static(),
       Plugin.Favicon(),

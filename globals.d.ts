@@ -1,4 +1,9 @@
 export declare global {
+  type PagesFunction = (context: {
+    request: Request
+    next: () => Promise<Response>
+  }) => Promise<Response>
+
   interface Document {
     addEventListener<K extends keyof CustomEventMap>(
       type: K,

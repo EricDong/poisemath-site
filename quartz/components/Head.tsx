@@ -1,10 +1,78 @@
 import { i18n } from "../i18n"
-import { FullSlug, getFileExtension, joinSegments, pathToRoot } from "../util/path"
+import {
+  FullSlug,
+  getFileExtension,
+  isAbsoluteURL,
+  joinSegments,
+  pathToRoot,
+  simplifySlug,
+} from "../util/path"
 import { CSSResourceToStyleElement, JSResourceToScriptElement } from "../util/resources"
 import { googleFontHref, googleFontSubsetHref } from "../util/theme"
 import { QuartzComponent, QuartzComponentConstructor, QuartzComponentProps } from "./types"
 import { unescapeHTML } from "../util/escape"
 import { CustomOgImagesEmitterName } from "../plugins/emitters/ogImage"
+
+function makeJsonLd(
+  fileData: QuartzComponentProps["fileData"],
+  cfg: QuartzComponentProps["cfg"],
+  description: string,
+  socialUrl: string,
+) {
+  const title = fileData.frontmatter?.title ?? i18n(cfg.locale).propertyDefaults.title
+  const isHome = fileData.slug === "index"
+  const isAbout = fileData.slug === "about"
+  const isArticle = fileData.filePath !== undefined && !isHome && !isAbout
+  const authorUrl = `https://${cfg.baseUrl}/about`
+  const socialImage = fileData.frontmatter?.socialImage
+  const image = socialImage
+    ? isAbsoluteURL(socialImage)
+      ? socialImage
+      : `https://${cfg.baseUrl}/static/${socialImage}`
+    : isArticle
+      ? `https://${cfg.baseUrl}/${fileData.slug}-og-image.webp`
+      : `https://${cfg.baseUrl}/static/og-image.png`
+  const base: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": isHome
+      ? "WebSite"
+      : isAbout
+        ? "AboutPage"
+        : isArticle
+          ? "BlogPosting"
+          : "CollectionPage",
+    name: title,
+    description,
+    url: socialUrl,
+    inLanguage: cfg.locale,
+    image,
+  }
+
+  if (isHome) {
+    return {
+      ...base,
+      publisher: { "@type": "Organization", name: cfg.pageTitle, url: socialUrl },
+      creator: { "@type": "Person", name: "Eric Dong", url: authorUrl },
+    }
+  }
+
+  if (!isArticle) return base
+
+  return {
+    ...base,
+    headline: title,
+    author: { "@type": "Person", name: "Eric Dong", url: authorUrl },
+    publisher: {
+      "@type": "Organization",
+      name: cfg.pageTitle,
+      url: `https://${cfg.baseUrl}/`,
+      logo: { "@type": "ImageObject", url: `https://${cfg.baseUrl}/static/icon.png` },
+    },
+    mainEntityOfPage: { "@type": "WebPage", "@id": socialUrl },
+    ...(fileData.dates?.published && { datePublished: fileData.dates.published.toISOString() }),
+    ...(fileData.dates?.modified && { dateModified: fileData.dates.modified.toISOString() }),
+  }
+}
 export default (() => {
   const Head: QuartzComponent = ({
     cfg,
@@ -12,9 +80,13 @@ export default (() => {
     externalResources,
     ctx,
   }: QuartzComponentProps) => {
-    const titleSuffix = cfg.pageTitleSuffix ?? ""
-    const title =
-      (fileData.frontmatter?.title ?? i18n(cfg.locale).propertyDefaults.title) + titleSuffix
+    const pageName = fileData.frontmatter?.title ?? i18n(cfg.locale).propertyDefaults.title
+    const isHome = fileData.slug === "index"
+    const isNotFound = fileData.slug === "404"
+    const isArticle = fileData.filePath !== undefined && !isHome && fileData.slug !== "about"
+    const title = isHome
+      ? "Poise Math｜数学学习、Math Academy 与 AI 教育"
+      : `${pageName}｜${cfg.pageTitle}`
     const description =
       fileData.frontmatter?.socialDescription ??
       fileData.frontmatter?.description ??
@@ -31,8 +103,9 @@ export default (() => {
     const socialUrl =
       fileData.slug === "404" || fileData.slug === "index"
         ? url.toString()
-        : joinSegments(url.toString(), fileData.slug!)
-    const canonicalUrl = socialUrl
+        : joinSegments(url.toString(), simplifySlug(fileData.slug!))
+    const canonicalUrl = isNotFound ? undefined : socialUrl
+    const jsonLd = makeJsonLd(fileData, cfg, description, socialUrl)
 
     const usesCustomOgImage = ctx.cfg.plugins.emitters.some(
       (e) => e.name === CustomOgImagesEmitterName,
@@ -56,9 +129,10 @@ export default (() => {
         <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossOrigin="anonymous" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-        <meta name="og:site_name" content={cfg.pageTitle}></meta>
+        <meta property="og:site_name" content={cfg.pageTitle}></meta>
         <meta property="og:title" content={title} />
-        <meta property="og:type" content="website" />
+        <meta property="og:type" content={isArticle ? "article" : "website"} />
+        <meta property="og:locale" content="zh_CN" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={title} />
         <meta name="twitter:description" content={description} />
@@ -72,23 +146,30 @@ export default (() => {
             <meta name="twitter:image" content={ogImageDefaultPath} />
             <meta
               property="og:image:type"
-              content={`image/${getFileExtension(ogImageDefaultPath) ?? "png"}`}
+              content={`image/${(getFileExtension(ogImageDefaultPath) ?? "png").replace(".", "")}`}
             />
           </>
         )}
 
         {cfg.baseUrl && (
           <>
-            <meta property="twitter:domain" content={cfg.baseUrl}></meta>
+            <meta name="twitter:domain" content={cfg.baseUrl}></meta>
             <meta property="og:url" content={socialUrl}></meta>
-            <meta property="twitter:url" content={socialUrl}></meta>
+            <meta name="twitter:url" content={socialUrl}></meta>
           </>
         )}
 
-        {cfg.baseUrl && <link rel="canonical" href={canonicalUrl} />}
+        {cfg.baseUrl && canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
         <link rel="icon" href={iconPath} />
         <meta name="description" content={description} />
+        {isNotFound && <meta name="robots" content="noindex,follow" />}
         <meta name="generator" content="Quartz" />
+        {!isNotFound && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          />
+        )}
 
         {css.map((resource) => CSSResourceToStyleElement(resource, true))}
         {js

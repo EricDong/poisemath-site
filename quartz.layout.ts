@@ -8,8 +8,9 @@ export const sharedPageComponents: SharedLayout = {
   afterBody: [],
   footer: Component.Footer({
     links: {
-      GitHub: "https://github.com/jackyzha0/quartz",
-      "Discord Community": "https://discord.gg/cRFFHYye7t",
+      关于: "/about",
+      专题: "/tags",
+      RSS: "/index.xml",
     },
   }),
 }
@@ -22,7 +23,9 @@ export const defaultContentPageLayout: PageLayout = {
       condition: (page) => page.fileData.slug !== "index",
     }),
     Component.ArticleTitle(),
-    Component.ContentMeta(),
+    Component.ContentMeta({
+      author: { name: "Eric Dong", url: "/about" },
+    }),
     Component.TagList(),
   ],
   left: [

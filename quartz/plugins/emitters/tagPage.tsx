@@ -35,11 +35,16 @@ function computeTagInfo(
         tag === "index"
           ? i18n(locale).pages.tagContent.tagIndex
           : `${i18n(locale).pages.tagContent.tag}: ${tag}`
+      const description =
+        tag === "index"
+          ? "浏览 Poise Math 的数学学习、Math Academy、AI 教育与学习方法专题。"
+          : `Poise Math 关于${tag}的文章合集，汇总相关方法、经验与案例。`
       return [
         tag,
         defaultProcessedContent({
           slug: joinSegments("tags", tag) as FullSlug,
-          frontmatter: { title, tags: [] },
+          description,
+          frontmatter: { title, description, tags: [] },
         }),
       ]
     }),
