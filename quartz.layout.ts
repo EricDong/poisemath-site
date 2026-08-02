@@ -9,7 +9,7 @@ export const sharedPageComponents: SharedLayout = {
   footer: Component.Footer({
     links: {
       关于: "/about",
-      专题: "/tags",
+      专题: "/tags/",
       RSS: "/index.xml",
     },
   }),
