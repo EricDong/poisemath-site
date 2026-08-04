@@ -15,7 +15,8 @@ import { CustomOgImagesEmitterName } from "../plugins/emitters/ogImage"
 
 const AUTHOR_SAME_AS = [
   "https://github.com/EricDong",
-  // TODO(Eric): Add the public profile URLs for 聪明的提问者, X, and Weibo.
+  "https://x.com/newstart",
+  // 微信公众号「聪明的提问者」无稳定公开 URL，暂不列入 sameAs
 ]
 
 function makeAuthor(authorUrl: string) {
