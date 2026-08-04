@@ -3,7 +3,7 @@
 # Used by Cloudflare Pages and local builds.
 set -euo pipefail
 
-CONTENT_REPO="${CONTENT_REPO:-https://github.com/EricDong/poisemath-content.git}"
+CONTENT_REPO="${CONTENT_REPO:-https://github.com/EricDong/tiwenzhe-content.git}"
 CONTENT_BRANCH="${CONTENT_BRANCH:-main}"
 CONTENT_PUBLISH_DIR="${CONTENT_PUBLISH_DIR:-publish}"
 CONTENT_DIR="content"
