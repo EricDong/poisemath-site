@@ -85,7 +85,7 @@ export default (() => {
     const isNotFound = fileData.slug === "404"
     const isArticle = fileData.filePath !== undefined && !isHome && fileData.slug !== "about"
     const title = isHome
-      ? "Poise Math｜数学学习、Math Academy 与 AI 教育"
+      ? "聪明的提问者｜AI 时代的具身学习：Math Academy 与数学学习"
       : `${pageName}｜${cfg.pageTitle}`
     const description =
       fileData.frontmatter?.socialDescription ??
