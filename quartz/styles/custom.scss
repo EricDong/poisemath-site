@@ -1,3 +1,176 @@
 @use "./base.scss";
+@use "./variables.scss" as *;
 
-// put your custom CSS here!
+// ---------- 中文排版调优（全站） ----------
+
+.page article {
+  p {
+    line-height: 1.85;
+    margin: 1.2em 0;
+  }
+
+  li {
+    line-height: 1.8;
+  }
+
+  img {
+    max-width: 100%;
+    // 防变形：Obsidian ![[img|300x200]] 等会输出 width/height 属性，
+    // max-width 压缩宽度时高度必须跟着等比缩放
+    height: auto;
+    border-radius: 6px;
+  }
+}
+
+// ---------- 手机断点 ----------
+
+@media all and ($mobile) {
+  .page > #quartz-body > .sidebar.left {
+    align-items: center;
+    gap: 0.25rem;
+    padding-top: 0.75rem;
+
+    & > .page-title {
+      flex: 0 0 auto;
+      font-size: 1.25rem;
+      line-height: 1.2;
+      white-space: nowrap;
+    }
+
+    & > .spacer {
+      display: none;
+    }
+
+    & > .flex-component {
+      flex: 1 1 auto;
+      min-width: 0;
+      gap: 0.5rem !important;
+    }
+
+    .search {
+      max-width: none;
+      min-width: 0;
+    }
+
+    .search > .search-button {
+      height: 44px;
+      padding-right: 0.5rem;
+    }
+
+    .darkmode,
+    .readermode {
+      width: 44px;
+      height: 44px;
+    }
+
+    .darkmode svg,
+    .readermode svg {
+      left: 12px;
+      top: 12px;
+    }
+
+    .explorer {
+      flex: 0 0 44px;
+      min-height: 44px;
+    }
+
+    button.mobile-explorer {
+      width: 44px;
+      height: 44px;
+      padding: 10px;
+    }
+  }
+
+  .page article {
+    // 正文等效字号提到约 17px
+    p,
+    li {
+      font-size: 1.0625rem;
+    }
+
+    // 一句一行：每句独立成行，句间留距；段间距靠 p 的 margin 形成明显空行
+    p > .sentence {
+      display: block;
+
+      & + .sentence {
+        margin-top: 0.45em;
+      }
+    }
+
+    p {
+      margin: 1.4em 0;
+    }
+  }
+
+  // 触屏点击目标
+  .tag-link,
+  footer a {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .mobile-toc summary,
+  .mobile-toc a {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+}
+
+// ---------- 手机端可折叠目录 ----------
+
+details.mobile-toc {
+  // 覆盖 .mobile-only 在手机断点下的 display: inline，否则 details 盒子会塌掉
+  @media all and ($mobile) {
+    display: block;
+  }
+  margin: 1rem 0;
+  padding: 0.6rem 0.9rem;
+  border: 1px solid var(--lightgray);
+  border-radius: 8px;
+  background-color: var(--light);
+
+  summary {
+    cursor: pointer;
+    font-weight: $semiBoldWeight;
+    color: var(--darkgray);
+    // 触屏目标高度
+    padding: 0.3rem 0;
+    list-style: none;
+
+    &::before {
+      content: "▸ ";
+      color: var(--gray);
+    }
+  }
+
+  &[open] summary::before {
+    content: "▾ ";
+  }
+
+  ul {
+    list-style: none;
+    margin: 0.5rem 0 0.2rem 0;
+    padding: 0;
+
+    li {
+      padding: 0.25rem 0;
+
+      a {
+        color: var(--darkgray);
+        background-color: transparent;
+      }
+
+      &.depth-1 {
+        padding-left: 1rem;
+      }
+      &.depth-2 {
+        padding-left: 2rem;
+      }
+      &.depth-3 {
+        padding-left: 3rem;
+      }
+    }
+  }
+}

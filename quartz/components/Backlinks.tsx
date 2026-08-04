@@ -28,23 +28,37 @@ export default ((opts?: Partial<BacklinksOptions>) => {
     if (options.hideWhenEmpty && backlinkFiles.length == 0) {
       return null
     }
+    const backlinkItems = () =>
+      backlinkFiles.map((f) => (
+        <li key={f.slug}>
+          <a href={resolveRelative(fileData.slug!, f.slug!)} class="internal">
+            {f.frontmatter?.title}
+          </a>
+        </li>
+      ))
     return (
-      <div class={classNames(displayClass, "backlinks")}>
-        <h3>{i18n(cfg.locale).components.backlinks.title}</h3>
-        <OverflowList>
-          {backlinkFiles.length > 0 ? (
-            backlinkFiles.map((f) => (
-              <li>
-                <a href={resolveRelative(fileData.slug!, f.slug!)} class="internal">
-                  {f.frontmatter?.title}
-                </a>
-              </li>
-            ))
-          ) : (
-            <li>{i18n(cfg.locale).components.backlinks.noBacklinksFound}</li>
-          )}
-        </OverflowList>
-      </div>
+      <>
+        <div class={classNames(displayClass, "backlinks", "backlinks-desktop")}>
+          <h3>{i18n(cfg.locale).components.backlinks.title}</h3>
+          <OverflowList>
+            {backlinkFiles.length > 0 ? (
+              backlinkItems()
+            ) : (
+              <li>{i18n(cfg.locale).components.backlinks.noBacklinksFound}</li>
+            )}
+          </OverflowList>
+        </div>
+        <details class={classNames(displayClass, "backlinks", "backlinks-mobile")}>
+          <summary>{i18n(cfg.locale).components.backlinks.title}</summary>
+          <ul>
+            {backlinkFiles.length > 0 ? (
+              backlinkItems()
+            ) : (
+              <li>{i18n(cfg.locale).components.backlinks.noBacklinksFound}</li>
+            )}
+          </ul>
+        </details>
+      </>
     )
   }
 

@@ -27,6 +27,7 @@ export const defaultContentPageLayout: PageLayout = {
       author: { name: "Eric Dong", url: "/about" },
     }),
     Component.TagList(),
+    Component.MobileOnly(Component.MobileToc()),
   ],
   left: [
     Component.PageTitle(),
@@ -44,7 +45,7 @@ export const defaultContentPageLayout: PageLayout = {
     Component.Explorer(),
   ],
   right: [
-    Component.Graph(),
+    Component.DesktopOnly(Component.Graph()),
     Component.DesktopOnly(Component.TableOfContents()),
     Component.Backlinks(),
   ],
