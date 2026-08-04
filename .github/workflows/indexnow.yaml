@@ -1,0 +1,29 @@
+name: Notify IndexNow
+
+# 内容仓发文走 Cloudflare deploy hook，不经过本仓 workflow，
+# 所以用每日 cron 抓线上 sitemap 兜底；push/dispatch 触发时同样以线上 sitemap 为准。
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "30 22 * * *" # 每日 06:30 北京时间
+  repository_dispatch:
+    types: [content-updated]
+  workflow_dispatch:
+
+jobs:
+  notify-indexnow:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+
+      - name: Wait for Cloudflare Pages deployment
+        if: github.event_name == 'push'
+        run: sleep 120
+
+      - name: Notify IndexNow
+        run: node scripts/ping-indexnow.mjs https://tiwenzhe.com/sitemap.xml

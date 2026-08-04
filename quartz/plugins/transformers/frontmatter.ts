@@ -193,6 +193,7 @@ declare module "vfile" {
         cssclasses: string[]
         socialImage: string
         comments: boolean | string
+        faq: Array<{ q: string; a: string }>
       }>
   }
 }
