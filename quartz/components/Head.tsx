@@ -13,6 +13,21 @@ import { QuartzComponent, QuartzComponentConstructor, QuartzComponentProps } fro
 import { unescapeHTML } from "../util/escape"
 import { CustomOgImagesEmitterName } from "../plugins/emitters/ogImage"
 
+const AUTHOR_SAME_AS = [
+  "https://github.com/EricDong",
+  // TODO(Eric): Add the public profile URLs for 聪明的提问者, X, and Weibo.
+]
+
+function makeAuthor(authorUrl: string) {
+  return {
+    "@type": "Person",
+    "@id": `${authorUrl}#person`,
+    name: "Eric Dong",
+    url: authorUrl,
+    sameAs: AUTHOR_SAME_AS,
+  }
+}
+
 function makeJsonLd(
   fileData: QuartzComponentProps["fileData"],
   cfg: QuartzComponentProps["cfg"],
@@ -24,6 +39,7 @@ function makeJsonLd(
   const isAbout = fileData.slug === "about"
   const isArticle = fileData.filePath !== undefined && !isHome && !isAbout
   const authorUrl = `https://${cfg.baseUrl}/about`
+  const author = makeAuthor(authorUrl)
   const socialImage = fileData.frontmatter?.socialImage
   const image = socialImage
     ? isAbsoluteURL(socialImage)
@@ -52,7 +68,7 @@ function makeJsonLd(
     return {
       ...base,
       publisher: { "@type": "Organization", name: cfg.pageTitle, url: socialUrl },
-      creator: { "@type": "Person", name: "Eric Dong", url: authorUrl },
+      creator: author,
     }
   }
 
@@ -61,7 +77,7 @@ function makeJsonLd(
   return {
     ...base,
     headline: title,
-    author: { "@type": "Person", name: "Eric Dong", url: authorUrl },
+    author,
     publisher: {
       "@type": "Organization",
       name: cfg.pageTitle,
@@ -72,6 +88,36 @@ function makeJsonLd(
     ...(fileData.dates?.published && { datePublished: fileData.dates.published.toISOString() }),
     ...(fileData.dates?.modified && { dateModified: fileData.dates.modified.toISOString() }),
   }
+}
+
+function makePersonJsonLd(
+  fileData: QuartzComponentProps["fileData"],
+  cfg: QuartzComponentProps["cfg"],
+) {
+  if (fileData.slug !== "about" || !cfg.baseUrl) return undefined
+  return { "@context": "https://schema.org", ...makeAuthor(`https://${cfg.baseUrl}/about`) }
+}
+
+function makeFaqJsonLd(fileData: QuartzComponentProps["fileData"]) {
+  const faq = fileData.frontmatter?.faq
+  if (!Array.isArray(faq) || faq.length === 0) return undefined
+
+  const mainEntity = faq
+    .filter(
+      (item): item is { q: string; a: string } =>
+        typeof item === "object" &&
+        item !== null &&
+        typeof item.q === "string" &&
+        typeof item.a === "string",
+    )
+    .map((item) => ({
+      "@type": "Question",
+      name: item.q,
+      acceptedAnswer: { "@type": "Answer", text: item.a },
+    }))
+
+  if (mainEntity.length === 0) return undefined
+  return { "@context": "https://schema.org", "@type": "FAQPage", mainEntity }
 }
 export default (() => {
   const Head: QuartzComponent = ({
@@ -85,7 +131,7 @@ export default (() => {
     const isNotFound = fileData.slug === "404"
     const isArticle = fileData.filePath !== undefined && !isHome && fileData.slug !== "about"
     const title = isHome
-      ? "聪明的提问者｜AI 时代的具身学习：Math Academy 与数学学习"
+      ? "聪明的提问者｜Math Academy 中文指南与 AI 时代数学学习"
       : `${pageName}｜${cfg.pageTitle}`
     const description =
       fileData.frontmatter?.socialDescription ??
@@ -106,6 +152,8 @@ export default (() => {
         : joinSegments(url.toString(), simplifySlug(fileData.slug!))
     const canonicalUrl = isNotFound ? undefined : socialUrl
     const jsonLd = makeJsonLd(fileData, cfg, description, socialUrl)
+    const faqJsonLd = makeFaqJsonLd(fileData)
+    const personJsonLd = makePersonJsonLd(fileData, cfg)
 
     const usesCustomOgImage = ctx.cfg.plugins.emitters.some(
       (e) => e.name === CustomOgImagesEmitterName,
@@ -126,7 +174,6 @@ export default (() => {
             )}
           </>
         )}
-        <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossOrigin="anonymous" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
         <meta property="og:site_name" content={cfg.pageTitle}></meta>
@@ -160,6 +207,7 @@ export default (() => {
         )}
 
         {cfg.baseUrl && canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
+        {isArticle && <link rel="alternate" type="text/markdown" href={`${socialUrl}.md`} />}
         <link rel="icon" href={iconPath} />
         <meta name="description" content={description} />
         {isNotFound && <meta name="robots" content="noindex,follow" />}
@@ -168,6 +216,18 @@ export default (() => {
           <script
             type="application/ld+json"
             dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          />
+        )}
+        {faqJsonLd && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+          />
+        )}
+        {personJsonLd && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}
           />
         )}
 

@@ -1,6 +1,6 @@
 import { QuartzComponent, QuartzComponentConstructor, QuartzComponentProps } from "./types"
 import breadcrumbsStyle from "./styles/breadcrumbs.scss"
-import { FullSlug, SimpleSlug, resolveRelative, simplifySlug } from "../util/path"
+import { FullSlug, SimpleSlug, joinSegments, resolveRelative, simplifySlug } from "../util/path"
 import { classNames } from "../util/lang"
 import { trieFromAllFiles } from "../util/ctx"
 
@@ -76,15 +76,39 @@ export default ((opts?: Partial<BreadcrumbOptions>) => {
       crumbs.pop()
     }
 
+    const breadcrumbJsonLd = ctx.cfg.configuration.baseUrl
+      ? {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: crumbs.map((crumb, index) => ({
+            "@type": "ListItem",
+            position: index + 1,
+            name: crumb.displayName,
+            item: `https://${joinSegments(
+              ctx.cfg.configuration.baseUrl!,
+              simplifySlug(pathNodes[index].slug),
+            )}`,
+          })),
+        }
+      : undefined
+
     return (
-      <nav class={classNames(displayClass, "breadcrumb-container")} aria-label="breadcrumbs">
-        {crumbs.map((crumb, index) => (
-          <div class="breadcrumb-element">
-            <a href={crumb.path}>{crumb.displayName}</a>
-            {index !== crumbs.length - 1 && <p>{` ${options.spacerSymbol} `}</p>}
-          </div>
-        ))}
-      </nav>
+      <>
+        <nav class={classNames(displayClass, "breadcrumb-container")} aria-label="breadcrumbs">
+          {crumbs.map((crumb, index) => (
+            <div class="breadcrumb-element">
+              <a href={crumb.path}>{crumb.displayName}</a>
+              {index !== crumbs.length - 1 && <p>{` ${options.spacerSymbol} `}</p>}
+            </div>
+          ))}
+        </nav>
+        {breadcrumbJsonLd && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+          />
+        )}
+      </>
     )
   }
   Breadcrumbs.css = breadcrumbsStyle
