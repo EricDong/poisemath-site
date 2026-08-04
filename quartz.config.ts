@@ -8,7 +8,7 @@ import * as Plugin from "./quartz/plugins"
  */
 const config: QuartzConfig = {
   configuration: {
-    pageTitle: "Poise Math",
+    pageTitle: "聪明的提问者",
     pageTitleSuffix: "",
     enableSPA: true,
     enablePopovers: true,
@@ -16,7 +16,7 @@ const config: QuartzConfig = {
       provider: "plausible",
     },
     locale: "zh-CN",
-    baseUrl: "poisemath.com",
+    baseUrl: "tiwenzhe.com",
     ignorePatterns: [
       "private",
       "templates",
@@ -26,7 +26,7 @@ const config: QuartzConfig = {
       "node_modules",
       "*.icloud",
     ],
-    defaultDateType: "modified",
+    defaultDateType: "published",
     theme: {
       fontOrigin: "local",
       cdnCaching: false,

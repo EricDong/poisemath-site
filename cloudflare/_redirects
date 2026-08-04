@@ -1,8 +1,12 @@
-# Cloudflare Pages redirects for the journeytomath.com -> poisemath.com migration.
-# Keep these 301 redirects active as long as journeytomath.com receives traffic.
-https://www.poisemath.com/* https://poisemath.com/:splat 301
-http://www.poisemath.com/* https://poisemath.com/:splat 301
-https://journeytomath.com/* https://poisemath.com/:splat 301
-https://www.journeytomath.com/* https://poisemath.com/:splat 301
-http://journeytomath.com/* https://poisemath.com/:splat 301
-http://www.journeytomath.com/* https://poisemath.com/:splat 301
+# Cloudflare Pages redirects: legacy domains -> tiwenzhe.com.
+# Keep these 301 redirects active as long as the legacy domains receive traffic.
+https://www.tiwenzhe.com/* https://tiwenzhe.com/:splat 301
+http://www.tiwenzhe.com/* https://tiwenzhe.com/:splat 301
+https://poisemath.com/* https://tiwenzhe.com/:splat 301
+https://www.poisemath.com/* https://tiwenzhe.com/:splat 301
+http://poisemath.com/* https://tiwenzhe.com/:splat 301
+http://www.poisemath.com/* https://tiwenzhe.com/:splat 301
+https://journeytomath.com/* https://tiwenzhe.com/:splat 301
+https://www.journeytomath.com/* https://tiwenzhe.com/:splat 301
+http://journeytomath.com/* https://tiwenzhe.com/:splat 301
+http://www.journeytomath.com/* https://tiwenzhe.com/:splat 301
